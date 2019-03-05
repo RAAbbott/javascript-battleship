@@ -1,0 +1,53 @@
+body
+{
+    background-color: lightcyan;
+}
+
+.playerGameBoard
+{
+    float: left;
+    width: 45%;
+    margin: 0 auto;
+}
+
+.opponentGameBoard
+{
+    float: right;
+    width: 45%;
+    margin: 0 auto;
+}
+
+tr, td
+{
+    border: 1px solid black;
+}
+
+.gamePiece
+{
+    background-color: black;
+}
+
+.miss
+{
+    background-color: blue;
+}
+
+.hit
+{
+    background-color: red;
+}
+
+.center
+{
+    text-align: center;
+}
+
+.checked
+{
+    background-color: rgb(221, 238, 238);
+}
+
+.unchecked
+{
+    background-color: rgb(206, 206, 206);
+}
