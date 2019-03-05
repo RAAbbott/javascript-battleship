@@ -1,3 +1,5 @@
+// model.js
+
 let carrier = {
     name: "carrier",
     numSquares: 5,
