@@ -1,24 +1,67 @@
-let gamePieceClass = "gamePiece";
-let missClass = "miss";
-let hitClass = "hit";
+var gamePieceClass = "gamePiece";
+var missClass = "miss";
+var hitClass = "hit";
 
-function showGrids() {
-  let playerBoardDiv = document.getElementsByClassName("playerGameBoard");
-  let opponentBoardDiv = document.getElementsByClassName("opponentGameBoard");
-  generateGrid(playerBoardDiv[0], 10, 10);
-  generateGrid(opponentBoardDiv[0], 10, 10);
+function createHeading() {
+  var message = document.createElement('p');
+  message.id = 'message';
+  document.getElementById('heading').appendChild(message);
+
+  // Create Select Dropdown
+  var ships = ['Carrier', 'Battleship', 'Cruiser', 'Submarine', 'Destroyer'];
+  var optionsDiv = document.getElementById('options');
+  var selectElement = document.createElement('select');
+  for (var i = 0; i < ships.length; i++) {
+    var option = document.createElement('option');
+    var shipText = ships[i].toString();
+    var ship = document.createTextNode(shipText);
+    option.appendChild(ship);
+    option.setAttribute('value', shipText.toLowerCase());
+    selectElement.appendChild(option);
+  }
+  optionsDiv.appendChild(selectElement);
+
+  // Create Text Input for ship positions
+  var textElement = document.createElement('input');
+  textElement.setAttribute('placeholder', 'Cell for ship head (e.g. A5)');
+  textElement.style.margin = '10px';
+  optionsDiv.appendChild(textElement);
+
+
+  // Create button to initiate game
+  var button = document.createElement('button');
+  var buttonText = document.createTextNode('Click to save ship settings');
+  button.appendChild(buttonText);
+  button.onclick = initiateGame;
+  optionsDiv.appendChild(button);
+
+}
+
+function initiateGame() {
+  console.log('initiateGame called');
   renderShips();
   updateView(); // This function will also be called anytime a click is registered on the game board
 }
 
+
+function showGrids() {
+  var playerBoardDiv = document.getElementsByClassName("playerGameBoard");
+  var opponentBoardDiv = document.getElementsByClassName("opponentGameBoard");
+  createHeading();
+  generateGrid(playerBoardDiv[0], 10, 10);
+  generateGrid(opponentBoardDiv[0], 10, 10);
+  initState(10);
+  animateElement();
+}
+
 function generateGrid(boardDiv, numRows, numColumns) {
-  let table = document.createElement("table");
+  var table = document.createElement("table");
   table.style.width = "90%";
   table.style.height = "500px";
-  let tableHead = document.createElement("thead");
+  var tableHead = document.createElement("thead");
 
   // Loop to create Table Header with Numbers
-  for (let i = 0; i < numColumns; i++) {
+  for (var i = 0; i < numColumns; i++) {
     if (i == 0) {
       tableHeaderCell = document.createElement("th");
       tableHeaderNumber = document.createTextNode(" ");
@@ -33,30 +76,22 @@ function generateGrid(boardDiv, numRows, numColumns) {
 
   table.appendChild(tableHead);
 
-  // Nested for-loops to create table rows with corresponding letter
-  for (let i = 0; i < numRows; i++) {
-    let tableRow = document.createElement("tr");
-    rowLetterHead = tableRow.appendChild(document.createElement("th"));
-    rowLetter = String.fromCharCode(i + 65);
-    rowLetterHead.appendChild(document.createTextNode(rowLetter));
-    tableRow.setAttribute("id", `${rowLetter}`);
+  // Nested for-loops to create table rows with corresponding varter
+  for (var i = 0; i < numRows; i++) {
+    var tableRow = document.createElement("tr");
+    rowvarterHead = tableRow.appendChild(document.createElement("th"));
+    rowvarter = String.fromCharCode(i + 65);
+    rowvarterHead.appendChild(document.createTextNode(rowvarter));
+    tableRow.setAttribute("id", `${rowvarter}`);
 
-    for (let j = 0; j < numColumns; j++) {
-      let tableData = document.createElement("td");
-      tableData.style.width = `${90 / numColumns}%`; // Table width is set to 90%, this makes sure that each data cell is an equal percentage of the total table width.
-      if (boardDiv.className == 'opponentGameBoard')
-      {
-        tableData.setAttribute("id", `e${rowLetter}${j + 1}`);
-        tableData.onclick = (function() {
-          let id = tableData.id;
-          return function() {
-            boardClick(id);
-          }
-        })();
-      }
-      else
-      {
-        tableData.setAttribute("id", `${rowLetter}${j + 1}`);
+    for (var j = 0; j < numColumns; j++) {
+      var tableData = document.createElement("td");
+      tableData.style.width = (90 / numColumns).toString() + '%'; // Table width is set to 90%, this makes sure that each data cell is an equal percentage of the total table width.
+      if (boardDiv.className == 'opponentGameBoard') {
+        tableData.setAttribute("id", 'e' + rowvarter.toString() + (j + 1).toString());
+        tableData.onclick = boardClick; // I am setting the onclick event to equal the function, and NOT the function return value
+      } else {
+        tableData.setAttribute("id", `${rowvarter}${j + 1}`);
       }
       if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) {
         tableData.className = "checked";
@@ -70,8 +105,7 @@ function generateGrid(boardDiv, numRows, numColumns) {
   boardDiv.appendChild(table);
 }
 
-function updateView()
-{
+function updateView() {
   renderShips();
   updatePlayerBoard();
   updateEnemyBoard();
@@ -80,13 +114,13 @@ function updateView()
   console.log('Player Destroyer destroyed? ', gameState.playerPieces.destroyer.destroyed);
 }
 
-function renderShips()
-{
-  let playerPieces = gameState.playerPieces;
-  for (let i in playerPieces)
-  {
-    for (let j in playerPieces[i].position)
-    {
+function renderShips() {
+  // Create Ships
+  createShipObjects();
+  var playerPieces = gameState.playerPieces;
+  console.log(playerPieces);
+  for (var i in playerPieces) {
+    for (var j in playerPieces[i].position) {
       box = document.getElementById(`${playerPieces[i].position[j].row}${playerPieces[i].position[j].column}`);
       box.className = gamePieceClass;
     }
@@ -94,19 +128,18 @@ function renderShips()
   }
 }
 
+// Add a dropdown to select which ship to add to the player board. I will create a constructor that will be used to create each ship. A text input will specify the Head of the ship
+// As well as the direction the ship will go. Button will be used to call the function with the ship;
+
 function updatePlayerBoard() {
-  for (let i in playerBoardMisses)
-  {
-    box = document.getElementById(`${playerBoardMisses[i]}`)
+  for (var i in playerBoardMisses) {
+    box = document.getElementById(playerBoardMisses[i].toString())
     box.className = missClass;
   }
-  let playerPieces = gameState.playerPieces;
-  for (let i in playerPieces)
-  {
-    for (let j in playerPieces[i].position)
-    {
-      if (playerPieces[i].position[j].hit == true)
-      {
+  var playerPieces = gameState.playerPieces;
+  for (var i in playerPieces) {
+    for (var j in playerPieces[i].position) {
+      if (playerPieces[i].position[j].hit == true) {
         box.className = hitClass;
       }
     }
@@ -114,14 +147,40 @@ function updatePlayerBoard() {
 }
 
 function updateEnemyBoard() {
-  for (let i in enemyBoardHits)
-  {
-    box = document.getElementById(`${enemyBoardHits[i]}`)
+  for (var i in enemyBoardHits) {
+    box = document.getElementById(enemyBoardHits[i].toString())
     box.className = hitClass;
   }
-  for (let i in enemyBoardMisses)
-  {
-    box = document.getElementById(`${enemyBoardMisses[i]}`)
+  for (var j in enemyBoardMisses) {
+    box = document.getElementById(enemyBoardMisses[j].toString())
     box.className = missClass;
   }
+}
+
+// Animation Code
+  element = document.createElement('h3');
+  text = document.createTextNode('Click on me for a prize!');
+  element.appendChild(text);
+  element.onclick = alertUser;
+  document.getElementById('animate').appendChild(element);
+  colors = ['red','yellow','blue','green','orange','black','white','gray','cyan','black'];
+  color = 0;
+  top = 0;
+  setTimeout(animateElement, 1000);
+function animateElement() {
+  // Animation
+  console.log(color);
+    element.style.color = colors[color];
+    color += 1;
+    if (color < 10)
+    {
+      setTimeout(animateElement, 2000);
+    }
+    else {
+      element.remove();
+    }
+}
+
+function alertUser() {
+  alert('Sorry, no prize for you! Continue to play the game...');
 }
